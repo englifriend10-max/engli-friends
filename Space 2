@@ -1,0 +1,24 @@
+      <input id="w${i}" placeholder="WORK worksheet / PDF URL" value="${esc(x.work_url)}">
+      <button class="btn alt" onclick="saveDay(${i})">Save Day ${i}</button></div>`}
+  $("dayEdit").innerHTML=h;
+}
+async function addStudent(){
+  const n=$("sName").value.trim(),p=$("sPass").value.trim();
+  if(!n||!p){$("stuErr").textContent="Enter a name and a password.";return}
+  const {error}=await db.rpc("admin_add_student",{p_admin:adminPw,p_name:n,p_password:p});
+  if(error){$("stuErr").textContent="Could not add: "+error.message;return}
+  $("stuErr").textContent="";$("sName").value=$("sPass").value="";toast("Student added");refreshAdmin();
+}
+async function saveDay(i){
+  const {error}=await db.rpc("admin_save_day",{p_admin:adminPw,p_day:i,p_video:$("v"+i).value.trim(),p_work:$("w"+i).value.trim()});
+  toast(error?"Save failed":"Day "+i+" saved");
+}
+async function refreshAdmin(){const {data}=await db.rpc("admin_list",{p_admin:adminPw});if(data)$("stuList").innerHTML=data.students.map(s=>`<li>${esc(s.name)}${s.start_at?" (started)":""}</li>`).join("")}
+
+async function startApp(){
+  let saved=null;try{saved=localStorage.getItem("engliUser")}catch(e){}
+  if(saved)await loadDash();else show("login");
+}
+</script>
+</body>
+</html>
